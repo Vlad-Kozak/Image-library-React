@@ -8,19 +8,20 @@ import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 import Loader from 'components/Loader/Loader';
 import Button from 'components/Button/Button';
 
-import { getImages } from 'service/api';
+import { fetchImages } from 'service/api';
 
-function ImageGallery({ keyword }) {
-  const [images, setImages] = useState([]);
+function ImageGallery({ keyword, page, setPage, images, setImages }) {
   const [loading, setLoading] = useState(false);
   const [showLoadMore, setShowLoadMore] = useState(false);
 
   useEffect(() => {
-    setImages([]);
-    setLoading(true);
-    setShowLoadMore(false);
+    if (keyword === '') {
+      return;
+    }
 
-    getImages(keyword, 1)
+    setLoading(true);
+
+    fetchImages(keyword, page)
       .then(r => {
         if (r.total === 0) {
           toast.info('По вашему запросу ничего не найдено!');
@@ -29,20 +30,7 @@ function ImageGallery({ keyword }) {
         if (r.total > 12) {
           setShowLoadMore(true);
         }
-        setImages(r.hits);
-      })
-      .catch(console.log)
-      .then(setLoading(false));
-  }, [keyword]);
-
-  const onLoadMoreClick = () => {
-    setLoading(true);
-
-    const page = images.length / 12 + 1;
-
-    getImages(keyword, page)
-      .then(r => {
-        if (r.total - images.length <= 12) {
+        if (page * 12 >= r.total) {
           setShowLoadMore(false);
         }
         setImages(images => {
@@ -50,7 +38,11 @@ function ImageGallery({ keyword }) {
         });
       })
       .catch(console.log)
-      .then(setLoading(false));
+      .finally(r => setLoading(false));
+  }, [keyword, page, setImages]);
+
+  const onLoadMoreClick = () => {
+    setPage(prevState => prevState + 1);
   };
 
   return (

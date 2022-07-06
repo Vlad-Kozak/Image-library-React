@@ -6,15 +6,25 @@ import ImageGallery from './ImageGallery/ImageGallery';
 
 function App() {
   const [keyword, setKeyword] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
 
   const onSubmit = keyword => {
     setKeyword(keyword);
+    setImages([]);
+    setPage(1);
   };
 
   return (
     <>
       <Searchbar onSubmit={onSubmit} />
-      <ImageGallery keyword={keyword} />
+      <ImageGallery
+        keyword={keyword}
+        setPage={setPage}
+        page={page}
+        images={images}
+        setImages={setImages}
+      />
       <ToastContainer autoClose={3000} />
     </>
   );
