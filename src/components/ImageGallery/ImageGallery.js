@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,63 +10,64 @@ import Button from 'components/Button/Button';
 
 import { getImages } from 'service/api';
 
-export default class ImageGallery extends Component {
-  static propTypes = { keyword: PropTypes.string.isRequired };
+function ImageGallery({ keyword }) {
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showLoadMore, setShowLoadMore] = useState(false);
 
-  state = { images: [], loading: false };
+  useEffect(() => {
+    setImages([]);
+    setLoading(true);
+    setShowLoadMore(false);
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.keyword !== this.props.keyword) {
-      this.setState({ images: [], loading: true, showLoadMore: false });
-
-      getImages(this.props.keyword, 1)
-        .then(r => {
-          if (r.total === 0) {
-            toast.info('По вашему запросу ничего не найдено!');
-            return;
-          }
-          if (r.total > 12) {
-            this.setState({ showLoadMore: true });
-          }
-          this.setState({ images: r.hits });
-        })
-        .catch(console.log)
-        .then(this.setState({ loading: false }));
-    }
-  }
-
-  onLoadMoreClick = () => {
-    this.setState({ loading: true });
-
-    const page = this.state.images.length / 12 + 1;
-
-    getImages(this.props.keyword, page)
+    getImages(keyword, 1)
       .then(r => {
-        if (r.total - this.state.images.length <= 12) {
-          this.setState({ showLoadMore: false });
+        if (r.total === 0) {
+          toast.info('По вашему запросу ничего не найдено!');
+          return;
         }
-        this.setState(state => {
-          return { images: [...state.images, ...r.hits] };
+        if (r.total > 12) {
+          setShowLoadMore(true);
+        }
+        setImages(r.hits);
+      })
+      .catch(console.log)
+      .then(setLoading(false));
+  }, [keyword]);
+
+  const onLoadMoreClick = () => {
+    setLoading(true);
+
+    const page = images.length / 12 + 1;
+
+    getImages(keyword, page)
+      .then(r => {
+        if (r.total - images.length <= 12) {
+          setShowLoadMore(false);
+        }
+        setImages(images => {
+          return [...images, ...r.hits];
         });
       })
       .catch(console.log)
-      .then(this.setState({ loading: false }));
+      .then(setLoading(false));
   };
 
-  render() {
-    const { images, loading, showLoadMore } = this.state;
-    return (
-      <>
-        {images && (
-          <ul className={s.gallery}>
-            <ImageGalleryItem images={images} />
-          </ul>
-        )}
+  return (
+    <>
+      {images && (
+        <ul className={s.gallery}>
+          <ImageGalleryItem images={images} />
+        </ul>
+      )}
 
-        {loading && <Loader />}
+      {loading && <Loader />}
 
-        {showLoadMore && <Button onClick={this.onLoadMoreClick} />}
-      </>
-    );
-  }
+      {showLoadMore && <Button onClick={onLoadMoreClick} />}
+    </>
+  );
 }
+
+ImageGallery.propTypes = { keyword: PropTypes.string.isRequired };
+
+export default ImageGallery;

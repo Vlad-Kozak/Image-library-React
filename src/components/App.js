@@ -1,25 +1,23 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 
-export class App extends Component {
-  state = {
-    keyword: '',
+function App() {
+  const [keyword, setKeyword] = useState('');
+
+  const onSubmit = keyword => {
+    setKeyword(keyword);
   };
 
-  onSubmit = keyword => {
-    this.setState({ keyword });
-  };
-
-  render() {
-    return (
-      <>
-        <Searchbar onSubmit={this.onSubmit} />
-        <ImageGallery keyword={this.state.keyword} />
-        <ToastContainer autoClose={3000} />
-      </>
-    );
-  }
+  return (
+    <>
+      <Searchbar onSubmit={onSubmit} />
+      <ImageGallery keyword={keyword} />
+      <ToastContainer autoClose={3000} />
+    </>
+  );
 }
+
+export default App;
