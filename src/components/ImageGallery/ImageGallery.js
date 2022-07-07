@@ -27,10 +27,10 @@ function ImageGallery({ keyword, page, setPage, images, setImages }) {
           toast.info('По вашему запросу ничего не найдено!');
           return;
         }
-        if (r.total > 12) {
+        if (r.total > 15) {
           setShowLoadMore(true);
         }
-        if (page * 12 >= r.total) {
+        if (page * 15 >= r.total) {
           setShowLoadMore(false);
         }
         setImages(images => {

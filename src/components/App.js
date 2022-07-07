@@ -9,8 +9,12 @@ function App() {
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
 
-  const onSubmit = keyword => {
-    setKeyword(keyword);
+  const onSubmit = word => {
+    if (word === keyword) {
+      return;
+    }
+
+    setKeyword(word);
     setImages([]);
     setPage(1);
   };
